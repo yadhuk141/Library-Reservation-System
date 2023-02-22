@@ -1,6 +1,19 @@
+'''
+Title: Online library reservation system  
+
+Author: Yadhu krishnan S 
+
+Created on: 02/02/2023 
+
+Last Modified Date: 20/02/2023 
+
+Reviewed by:  
+
+Reviewed on:
+'''
 import csv
 import re
-from AdminMENU import Admin_Menu as am
+from AdminMENU import admin_Menu as am
 from Home import h 
 
 class Access:
@@ -46,8 +59,9 @@ class Access:
         with open('Users.csv','r') as f:
             read=csv.reader(f,delimiter=",")
             for i in read:
-                if i[0]==u:
-                    return True
+                if i:
+                    if i[0]==u:
+                        return True
 
     def register(self):
         new_user=[]

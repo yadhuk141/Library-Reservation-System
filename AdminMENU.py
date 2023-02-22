@@ -1,7 +1,7 @@
 import csv
 from Home import h 
 
-class admin_menu:
+class Admin_menu:
     def __init__(self):
         pass
 
@@ -174,4 +174,4 @@ class admin_menu:
             else:
                 print("\nInvalid choice try again\n")
                 
-Admin_Menu=admin_menu() 
+admin_Menu=Admin_menu() 

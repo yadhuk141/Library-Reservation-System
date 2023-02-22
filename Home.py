@@ -2,7 +2,7 @@ import csv
 from Hdelivery import HD
 from random import randrange
 
-class home:
+class Home:
     def __init__(self):
         pass
 
@@ -123,4 +123,4 @@ class home:
                 return
             else:
                 print("\nInvalid choice try again\n")
-h=home()
+h=Home()
