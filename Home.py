@@ -3,8 +3,6 @@ from Hdelivery import HD
 from random import randrange
 from AdminMENU import admin_Menu as am
 class Home:
-    def __init__(self):
-        pass
 
     def clr_blank(self):
         with open('temp.csv', newline='') as in_file:

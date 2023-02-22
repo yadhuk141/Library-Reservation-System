@@ -12,8 +12,7 @@ from AdminMENU import admin_Menu as am
 from Home import h 
 
 class Access:
-    def __init__(self):
-        pass
+
     def login(self):
         count=0
         while True:
