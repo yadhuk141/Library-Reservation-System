@@ -1,14 +1,9 @@
 '''
 Title: Online library reservation system  
-
 Author: Yadhu krishnan S 
-
 Created on: 02/02/2023 
-
 Last Modified Date: 22/02/2023 
-
 Reviewed by:  
-
 Reviewed on:
 '''
 import csv
