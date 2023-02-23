@@ -4,13 +4,6 @@ from random import randrange
 from AdminMENU import admin_Menu as am
 class Home:
 
-    def clr_blank(self):
-        with open('temp.csv', newline='') as in_file:
-            with open('Books.csv', 'w', newline='') as out_file:
-                writer = csv.writer(out_file)
-                for row in csv.reader(in_file):
-                    if row:
-                        writer.writerow(row)    
 
     def Report(self,reserved,userid):
         print("\n")
