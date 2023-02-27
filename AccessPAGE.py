@@ -21,7 +21,7 @@ class Access:
                 print("Too many attempts!")
                 return
             ch=input("Continue Log in? (y/n):")
-            if ch=='n' or ch=='N':
+            if ch!="y" or ch!='Y':
                 return
             userid=input("Enter username: ")
             pw=input("Enter password:")
