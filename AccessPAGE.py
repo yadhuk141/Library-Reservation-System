@@ -60,7 +60,7 @@ class Access:
     def register(self):
         new_user=[]
         while True:
-            temp=input("Enter user id:")
+            temp=input("Enter user id(The username should be globally unique!!!):")
             if re.match(r"[A-Za-z\s]+",temp):
                 check=self.verify(temp)
                 if check:
@@ -72,7 +72,7 @@ class Access:
             else:
                 print("Invalid username try again!!!\n")
         while True:
-            temp=input("Enter new password:")
+            temp=input("Enter new password(should contain one Capital letter, numericals and special characters): ")
             if re.match(r"^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$])[\w\d@#$]{6,12}$", temp):
                 print("Valid password")
                 new_user.append(temp)
