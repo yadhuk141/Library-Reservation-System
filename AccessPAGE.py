@@ -21,7 +21,7 @@ class Access:
                 print("Too many attempts!")
                 return
             ch=input("Continue Log in? (y/n):")
-            if ch!="y" or ch!='Y':
+            if ch!="y":
                 return
             userid=input("Enter username: ")
             pw=input("Enter password:")
@@ -72,7 +72,7 @@ class Access:
             else:
                 print("Invalid username try again!!!\n")
         while True:
-            temp=input("Enter new password(should contain one Capital letter, numericals and special characters): ")
+            temp=input("Enter new password: ")
             if re.match(r"^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$])[\w\d@#$]{6,12}$", temp):
                 print("Valid password")
                 new_user.append(temp)
