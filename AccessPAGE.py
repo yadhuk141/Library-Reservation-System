@@ -10,6 +10,7 @@ import csv
 import re
 from AdminMENU import admin_Menu as am
 from Home import h 
+import getpass
 
 class Access:
 
@@ -24,7 +25,7 @@ class Access:
             if ch!="y":
                 return
             userid=input("Enter username: ")
-            pw=input("Enter password:")
+            pw=getpass.getpass(prompt="Enter password: ")
             with open('Users.csv',"r") as users:
                 read=csv.reader(users,delimiter=",")
                 for r in read:
