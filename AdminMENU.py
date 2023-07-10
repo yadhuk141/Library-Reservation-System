@@ -1,17 +1,7 @@
 import csv
 
-class Admin_menu:
-    def __init__(self):
-        self.books=[["Python","RD","u"],["Devops","JD","u"]]
 
-    """ def clr_blank(self):
-        with open('temp.csv', newline='') as in_file:
-            with open('Books.csv', 'a', newline='') as out_file:
-                writer = csv.writer(out_file)
-                for row in csv.reader(in_file):
-                    if row:
-                        writer.writerow(row) """
-    
+class Admin_menu:    
     def Search(self,title):
         flag=True 
         """ with open('Books.csv',"r") as books:
