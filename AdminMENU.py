@@ -1,136 +1,94 @@
 import csv
-
-
+import mysql.connector
+from tabulate import tabulate
 class Admin_menu:    
-    def Search(self,title):
-        flag=True 
-        """ with open('Books.csv',"r") as books:
-            read=csv.reader(books,delimiter=",") """
+    def __init__(self) -> None:
+        try:
+            self.conn = mysql.connector.connect(
+                host="127.0.0.1",
+                user="root",
+                password="yadhuafr141",
+                database="library"
+            )
+        except Exception:
+            print("Error with database connection")
+            return
+        else:
+            self.cursor = self.conn.cursor() 
 
-        for r in self.books:
-            if r[0]==title:
-                print("Book found!!\n")
-                print("TITLE: ",r[0])
-                print("AUTHOR: ",r[1])
-                if r[2]=='r':
-                    print("STATUS: RESERVED\n")
-                else:
-                    print("STATUS: UNRESERVED\n")
-                flag =False
-                return flag
-        return flag
+    def __del__(self):
+        self.cursor.close()
+        self.conn.close()
+
+    def Search(self,title):
+        select_query = "SELECT * FROM books WHERE title = %s"
+        self.cursor.execute(select_query, (title,))
+        row = self.cursor.fetchone()
+        return row
 
     def remove_user(self):
-        with open("Users.csv","r") as inp,open('temp.csv','w') as out:
-            csv_inp=csv.reader(inp)
-            csv.writer(out).writerows(csv_inp)
-        user_name=input("Enter username to be removed: ")
-        
-        reader = csv.reader(open("temp.csv", "r"), delimiter=',')
-        f = csv.writer(open("Users.csv", "w"))
-        flag=True
-        for line in reader:
-            
-            if user_name not in line:
-                if line:
-                    f.writerow(line)
-            flag=False
-                #print line
-        if flag:
-            print("User not present in database\n")
+        username=input("Enter username to be deleted:")
+        select_query = "SELECT * FROM users WHERE name = %s"
+        self.cursor.execute(select_query, (username,))
+        row = self.cursor.fetchone()
+        if row is not None:
+            delete_query = "DELETE FROM users WHERE name = %s"
+            self.cursor.execute(delete_query, (username,))
+            self.conn.commit()
+            print("User deleted successfully!")
         else:
-            print("User Removed\n")
+            print("User not found.")
         return
 
     def add_books(self):
-        list1=[]
-
-        temp=input("Enter book title:")
-        list1.append(temp)
-        temp=input("Enter book author:")
-        list1.append(temp)
-        temp=input("Enter reservation status:")
-        list1.append(temp)
-        self.books.append(list1)
-
-        """ try:
-            with open('temp.csv',"w") as users:
-                writer=csv.writer(users)
-                writer.writerow(books)
-        except Exception:
-            print("An error occured, please try again\n")
-            return
-        else:
-            self.clr_blank()
-            print("\nBook added succesfully!!!\n") """
-
+        title=input("Enter book title:")
+        author=input("Enter book author:")
+        reservation=input("Enter reservation status:")
+        insert_query = "INSERT INTO books (title, author, reservation) VALUES (%s, %s, %s)"
+        values = (title, author, reservation)
+        self.cursor.execute(insert_query, values)
+        self.conn.commit()
+        print("Book added successfully!\n")
         return
 
     def remove_books(self):
-        """  with open("Books.csv","r") as inp,open('temp.csv','w') as out:
-            csv_inp=csv.reader(inp)
-            csv.writer(out).writerows(csv_inp) """
-
-        book=input("Enter title of book to be removed:")
-
-        """ reader = csv.reader(open("temp.csv", "r"), delimiter=',')
-        f = csv.writer(open("Books.csv", "w")) """
-
-        for line in self.books:
-            flag=True
-            if book in line:
-                self.books.pop(self.books.index(line))
-                flag=False
-                break
-        if flag:
-            print("Book not present in database\n")
-        else:
-            print("\nBook Removed\n")
-            #self.clr_blank()
+        title=input("Enter book title to be removed:")    
+        delete_query = "DELETE FROM books WHERE title = %s"
+        self.cursor.execute(delete_query, (title,))
+        self.conn.commit()
+        print("Book deleted successfully!\n")
         return
 
     def Return_books(self):
-        """ TEXTFILE = open("temp.csv", "w")
-        TEXTFILE.truncate()
-        TEXTFILE.close()"""
-
-        title=input("Enter title: ") 
-        flag=self.Search(title)
-        if flag:
-            print("Book does not exist in the library")
-            return
+        title=input("Enter book title to be removed:")
+        select_query = "SELECT reservation FROM books WHERE title = %s"
+        self.cursor.execute(select_query, (title,))
+        row = self.cursor.fetchone()
+        if row:
+            current_reservation = row[0]
+            if current_reservation == "Yes":
+                update_query = "UPDATE books SET reservation = 'No' WHERE title = %s"
+                self.cursor.execute(update_query, (title,))
+                self.conn.commit()
+                print("Reservation status updated: Book is now unreserved.")
+            else:
+                print("This book is already unreserved.")
         else:
-            flag =True
-            """ with open("Books.csv",'r') as books:
-                with open("temp.csv","a") as temp:
-                    read=csv.reader(books,delimiter=",")
-                    writer = csv.writer(temp)
-                    for r in read:
-                        if r: """
-            for r in self.books:
-                if r[0]==title and r[2]=="u" and flag:
-                    print("The book is unreserved\n")
-                    return
-                elif r[0]==title and r[2]=='r' and flag:
-                    r[2]="u"
-                    #writer.writerow(r)
-                    print("Book is returned!!!")
-                    flag=False
-
-                """ else:
-                    writer.writerow(r)  
-                    self.clr_blank()  """                   
-
+            print("Book not found.")
+        return
 
     def view_users(self):
-        print("\nUsername\tCity")
-        print("-------------------")
-        with open("Users.csv","r")as u:
-            read=csv.reader(u)
-            for r in read:
-                if r:
-                    print(r[0],"\t",r[2])
-        print("\n")
+        select_query = "SELECT * FROM users"
+        self.cursor.execute(select_query)
+        rows = self.cursor.fetchall()
+        if rows:
+            columns = [desc[0] for desc in self.cursor.description]
+            print(tabulate(rows, headers=columns, tablefmt="psql"))
+            print("\n")
+        else:
+            print("No  users found\n")
+        return
+
     def Book_manage(self):
         print("------BOOK MANAGEMENT--------")
         while True:

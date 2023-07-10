@@ -48,7 +48,7 @@ class Access:
         password = input("Enter password: ")
         if self.verify_login(username, password):
             print("Login successful!\n")
-            h.Menu()
+            h.Menu(username)
         else:
             self.login_attempts += 1
             print("Invalid username or password.")

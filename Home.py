@@ -1,6 +1,5 @@
 import csv
 from Hdelivery import HD
-from random import randrange
 from AdminMENU import admin_Menu as am
 import mysql.connector
 from tabulate import tabulate
@@ -73,7 +72,7 @@ class Home:
         return
 
 
-    def Menu(self):
+    def Menu(self,username):
         count=0
         print("Please select required operation\n")
         while True:
@@ -98,11 +97,9 @@ class Home:
             elif ch==4:
                 hd=input("Go for home delivery?(y/n): ")
                 if hd=='y':
-                    HD.verify(userid)                                       
+                    HD.verify(username)                                       
                 else:
                     print("Please collect the books from library!!!\n")
-                print("\nUse the otp to confirm order at the library or with the delivery personnel:")
-                print(randrange(1000,10000),"\n")
                 return
             else:
                 print("\nInvalid choice try again\n")
