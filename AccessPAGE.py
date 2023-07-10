@@ -10,72 +10,67 @@ import csv
 import re
 from AdminMENU import admin_Menu as am
 from Home import h 
+import mysql.connector
 
 class Access:
+    def __init__(self) -> None:
+        try:
+            self.conn = mysql.connector.connect(
+                host="127.0.0.1",
+                user="root",
+                password="yadhuafr141",
+                database="library"
+            )
+        except Exception:
+            print("Error with database connection")
+            return
+        else:
+            self.cursor = self.conn.cursor() 
+
+    def __del__(self):
+        self.cursor.close()
+        self.conn.close()
+
+    def verify_username(self,username):
+        select_query = "SELECT name FROM users WHERE name = %s"
+        self.cursor.execute(select_query, (username,))
+        row = self.cursor.fetchone()
+        return row is not None
+    
+    def verify_login(self, username, password):
+        select_query = "SELECT name FROM users WHERE name = %s AND password = %s"
+        self.cursor.execute(select_query, (username, password))
+        row = self.cursor.fetchone()
+        return row is not None
 
     def login(self):
-        count=0
-        while True:
-            flag=True
-            if count>=3:
-                print("Too many attempts!")
-                return
-            ch=input("Continue Log in? (y/n):")
-            if ch=='n' or ch=='N':
-                return
-            userid=input("Enter username: ")
-            pw=input("Enter password:")
-            with open('Users.csv',"r") as users:
-                read=csv.reader(users,delimiter=",")
-                for r in read:
-                    try:
-                        if r[0]==userid and r[1]==pw:
-                            print("Valid credentials!!!\n")
-                            flag=False
-                            h.Menu(r[0])
-                            break
-                    except:
-                        continue
-            if flag:
-                print("Incorrect username or password!!!")
-                count+=1
-                print("TRY AGAIN!!!\n")
-
-    def clr_blank(self):
-        with open('temp.csv', newline='') as in_file:
-            with open('Users.csv', 'a', newline='') as out_file:
-                writer = csv.writer(out_file)
-                for row in csv.reader(in_file):
-                    if row:
-                        writer.writerow(row)                
-                        
-    def verify(self,u):
-        with open('Users.csv','r') as f:
-            read=csv.reader(f,delimiter=",")
-            for i in read:
-                if i:
-                    if i[0]==u:
-                        return True
-
+        username = input("Enter username: ")
+        password = input("Enter password: ")
+        if self.verify_login(username, password):
+            print("Login successful!\n")
+            h.Menu()
+        else:
+            self.login_attempts += 1
+            print("Invalid username or password.")
+            if self.login_attempts >= 3:
+                print("Maximum login attempts reached. Exiting the program.")
+                exit()
+              
     def register(self):
-        new_user=[]
         while True:
-            temp=input("Enter user id:")
-            if re.match(r"[A-Za-z\s]+",temp):
-                check=self.verify(temp)
-                if check:
-                    print("Username already exists try again!!!\n")
-                    continue
-                print("Valid username")
-                new_user.append(temp)
-                break
-            else:
-                print("Invalid username try again!!!\n")
+            username=input("Enter user id:")
+            if self.verify_username(username):
+                print("Username already exists try again!!!\n")
+                continue
+            print("Valid username")
+            new_user=username
+            break
         while True:
             temp=input("Enter new password:")
-            if re.match(r"^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$])[\w\d@#$]{6,12}$", temp):
+            pattern = r"^(?=.*[\d])(?=.*[A-Z])(?=.*[@#$])[\w\d@#$]{6,12}$"
+            if re.match(pattern, temp):
                 print("Valid password")
-                new_user.append(temp)
+                new_pw=temp
                 break
             else:
                 print("Invalid password try again!!!\n")
@@ -83,22 +78,17 @@ class Access:
         while True: 
             temp=input("Enter address:")
             if re.match(r"[A-Za-z\s]+",temp):
-                new_user.append(temp)
+                new_addr=temp
                 print("Valid address")
                 break
             else:
-                print("Invalid address try again!!!\n")
-        try:
-            with open('temp.csv',"w") as users:
-                writer=csv.writer(users)
-                writer.writerow(new_user)
-        except Exception:
-            print("An error occured, please try again\n")
-            return
-        else:
-            self.clr_blank()
-            print("User registered succesfully!!!\n")
-            return
+                print("Invalid address try again!!!\n")    
+        insert_query = "INSERT INTO users (name, password, address) VALUES (%s, %s, %s)"
+        values = (new_user, new_pw, new_addr)
+        self.cursor.execute(insert_query, values)
+        self.conn.commit()
+        print("User registered succesfully!!!\n")
+        return
 
     def admin(self):
         count=0

@@ -2,86 +2,78 @@ import csv
 from Hdelivery import HD
 from random import randrange
 from AdminMENU import admin_Menu as am
+import mysql.connector
+from tabulate import tabulate
+
 class Home:
-
-
-    def Report(self,reserved,userid):
-        print("\n")
-        print("RESERVATION REPORT")
-        for i in reserved:
-            print("Title: ",i[0])
-            print("Author: ",i[1])
-            print("--------------")
        
-
-
     def Search(self,title):
-        flag=True 
-        """ with open('Books.csv',"r") as books:
-            read=csv.reader(books,delimiter=",") """
-
-        for r in am.books:
-            if r[0]==title:
-                print("Book found!!\n")
-                print("TITLE: ",r[0])
-                print("AUTHOR: ",r[1])
-                if r[2]=='r':
-                    print("STATUS: RESERVED\n")
-                else:
-                    print("STATUS: UNRESERVED\n")
-                flag =False
-                return flag
-        return flag
-           
-
-    def Reserve(self,userid):
-        """ TEXTFILE = open("temp.csv", "w")
-        TEXTFILE.truncate()
-        TEXTFILE.close() """
-        
-        reserved=[]    
-        title=input("Enter title: ")
-        flag=self.Search(title)
-        if flag:
-            print("Book does not exist in the library")
-            return
-        else:
-            """ with open("Books.csv",'r') as books:
-                with open("temp.csv","a") as temp:
-                    read=csv.reader(books,delimiter=",")
-                    writer = csv.writer(temp) """
-
-            for r in am.books:
-                if r[0]==title and r[2]=="r":
-                    print("The book is already reserved!")
-                    return
-                elif r[0]==title and r[2]=='u':
-                    r[2]='r'
-                    #writer.writerow(r)
-                    print("Book is Reserved!!!!")
-                    reserved.append(r)
-                    
-                """ else:
-                    if r:
-                        writer.writerow(r) """      
-
-        self.Report(reserved,userid)
-        #self.clr_blank()
-        return
-    def BookList(self):
-        """ with open("Books.csv",'r') as books:
-            read=csv.reader(books,delimiter=",") """
-        for i in am.books:
-            print("Book title:",i[0])
-            print("Author: ",i[1])
+        conn = mysql.connector.connect(
+            host="127.0.0.1",
+            user="root",
+            password="yadhuafr141",
+            database="library"
+        )
+        cursor = conn.cursor()
+        select_query = "SELECT reservation FROM books WHERE title = %s"
+        cursor.execute(select_query, (title,))
+        rows = cursor.fetchall()
+        if rows:
+            print("Reservation status for book", title, ":")
+            print(rows[0][0])
             print("\n")
-        print("---------------------------------\n")
+        else:
+            print("Book not found\n")
+        cursor.close()
+        conn.close()
+
+
+    def Reserve(self):
+        conn = mysql.connector.connect(
+            host="127.0.0.1",
+            user="root",
+            password="yadhuafr141",
+            database="library"
+        )
+        cursor = conn.cursor()
+        title=input("Enter title: ")
+        select_query = "SELECT * FROM books WHERE title = %s"
+        cursor.execute(select_query, (title,))
+        row = cursor.fetchone()
+        if row is None:
+            print("Book not found\n")
+        else:
+            reserve_value = row[2]
+            if reserve_value == "No":
+                update_query = "UPDATE books SET reservation = 'Yes' WHERE title = %s"
+                cursor.execute(update_query, (title,))
+                conn.commit()
+                print("Reserved successfully\n")
+            elif reserve_value == "Yes":
+                print("Book is already reserved\n")
+        return
+
+    
+    def BookList(self):
+        conn = mysql.connector.connect(
+            host="127.0.0.1",
+            user="root",
+            password="yadhuafr141",
+            database="library"
+        )
+        cursor = conn.cursor()
+        select_query = "SELECT * FROM books"
+        cursor.execute(select_query)
+        rows = cursor.fetchall()
+        columns = [desc[0] for desc in cursor.description]
+        print(tabulate(rows, headers=columns, tablefmt="psql"))
+        print("\n")
+        cursor.close()
+        conn.close()
         return
 
 
-
-
-    def Menu(self,userid):
+    def Menu(self):
         count=0
         print("Please select required operation\n")
         while True:
@@ -93,13 +85,11 @@ class Home:
                 continue
             if ch==1:
                 title=input("Enter title: ")
-                flag=self.Search(title) 
-                if flag:
-                    print("Book not found")
+                self.Search(title) 
             elif ch==2:
                 count+=1
                 if count<=2:
-                    self.Reserve(userid)
+                    self.Reserve()
                 else:
                     print("You can only reserve two books!!!")
             elif ch==3:
