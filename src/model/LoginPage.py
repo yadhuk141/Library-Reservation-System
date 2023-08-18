@@ -2,34 +2,38 @@
 Title: Online library reservation system  
 Author: Yadhu krishnan S 
 Created on: 02/02/2023 
-Last Modified Date: 22/02/2023 
+Last Modified Date: 25/07/2023 
 Reviewed by:  
 Reviewed on:
 '''
-import csv
 import re
-from AdminMENU import admin_Menu as am
-from Home import h 
+from model.AdminMENU import admin_Menu 
+from model.Home import home 
 import mysql.connector
 
 class Access:
-    def __init__(self) -> None:
+    def __init__(self):
+        db_config  = {}
+        with open("C:/Users/user/OneDrive/Desktop/LMS/Database_connection.txt", 'r') as file:
+            lines = file.readlines()
+            db_config['Host'] = lines[0].strip()
+            db_config['User'] = lines[1].strip()
+            db_config['Password'] = lines[2].strip()
+            db_config['Database'] = lines[3].strip()
         try:
-            self.conn = mysql.connector.connect(
-                host="127.0.0.1",
-                user="root",
-                password="yadhuafr141",
-                database="library"
+            self.connection = mysql.connector.connect(
+                host=db_config['Host'],
+                user=db_config['User'],
+                password=db_config['Password'],
+                database=db_config['Database']
             )
         except Exception:
             print("Error with database connection")
             return
         else:
-            self.cursor = self.conn.cursor() 
+            self.cursor = self.connection.cursor() 
 
-    def __del__(self):
-        self.cursor.close()
-        self.conn.close()
+    
 
     def verify_username(self,username):
         select_query = "SELECT name FROM users WHERE name = %s"
@@ -48,13 +52,10 @@ class Access:
         password = input("Enter password: ")
         if self.verify_login(username, password):
             print("Login successful!\n")
-            h.Menu(username)
+            home.Menu(username)
         else:
-            self.login_attempts += 1
             print("Invalid username or password.")
-            if self.login_attempts >= 3:
-                print("Maximum login attempts reached. Exiting the program.")
-                exit()
+            
               
     def register(self):
         while True:
@@ -86,50 +87,33 @@ class Access:
         insert_query = "INSERT INTO users (name, password, address) VALUES (%s, %s, %s)"
         values = (new_user, new_pw, new_addr)
         self.cursor.execute(insert_query, values)
-        self.conn.commit()
+        self.connection.commit()
         print("User registered succesfully!!!\n")
         return
 
     def admin(self):
         count=0
-        admin="admin"
-        password="12345"
+        credentials = {}
+        with open("C:/Users/user/OneDrive/Desktop/LMS/admin_credentials.txt", 'r') as file:
+            lines = file.readlines()
+            for i in range(0, len(lines), 2):
+                username = lines[i].strip()
+                password = lines[i+1].strip()
+                credentials[username] = password
         while True:
             if count>=3:
                 print("Too many attempts!!!\n")
                 return
-            ch=input("Continue? (y/n):")
-            if ch=='n' or ch=='n':
+            choice1=input("Continue? (y/n):")
+            if choice1=='n' or choice1=='n':
                 return
             adminid=input("Enter admin ID: ")
             adminpass=input("Enter admin password:")
-            if admin==adminid and password==adminpass:
+            if adminid in credentials and credentials[username] == adminpass:
                 print("Valid credentials!!!\n")
-                am.mainMenu()
+                admin_Menu.mainMenu()
                 break
             else:
                 print("Invalid Credentials try again!!!\n")
                 count+=1
-                
-
-#MAIN
-obj=Access()
-flag=True
-print("----------------Welcome-----------------")
-while flag:
-    print("\n1.Login\n2.Register\n3.Admin Login\n4.Exit\n")
-    try:
-        ch=int(input("Enter choice:"))
-    except Exception:
-        print("Invalid choice try again")
-        continue
-    if ch==1:
-        obj.login()
-    elif ch==2:
-        obj.register()
-    elif ch==3:
-        obj.admin()
-    elif ch==4:
-        flag=False
-    else:
-        print("\nInvalid choice try again\n")
+object=Access()

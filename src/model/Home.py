@@ -1,40 +1,46 @@
-import csv
-from Hdelivery import HD
-from AdminMENU import admin_Menu as am
+from controller.Homedelivery import HD
+from model.AdminMENU import admin_Menu as am
 import mysql.connector
 from tabulate import tabulate
 
 class Home:
+    def __init__(self):
+        db_config  = {}
+        with open("C:/Users/user/OneDrive/Desktop/LMS/Database_connection.txt", 'r') as file:
+            lines = file.readlines()
+            db_config['Host'] = lines[0].strip()
+            db_config['User'] = lines[1].strip()
+            db_config['Password'] = lines[2].strip()
+            db_config['Database'] = lines[3].strip()
+        try:
+            self.connection = mysql.connector.connect(
+                host=db_config['Host'],
+                user=db_config['User'],
+                password=db_config['Password'],
+                database=db_config['Database']
+            )
+        except Exception:
+            print("Error with database connection")
+            return
+        else:
+            self.cursor = self.connection.cursor() 
        
     def Search(self,title):
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="yadhuafr141",
-            database="library"
-        )
-        cursor = conn.cursor()
         select_query = "SELECT reservation FROM books WHERE title = %s"
-        cursor.execute(select_query, (title,))
-        rows = cursor.fetchall()
+        self.cursor.execute(select_query, (title,))
+        rows = self.cursor.fetchall()
         if rows:
             print("Reservation status for book", title, ":")
             print(rows[0][0])
             print("\n")
         else:
             print("Book not found\n")
-        cursor.close()
-        conn.close()
+        self.cursor.close()
+        self.connection.close()
 
 
     def Reserve(self):
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="yadhuafr141",
-            database="library"
-        )
-        cursor = conn.cursor()
+        cursor=self.connection.cursor()
         title=input("Enter title: ")
         select_query = "SELECT * FROM books WHERE title = %s"
         cursor.execute(select_query, (title,))
@@ -46,7 +52,7 @@ class Home:
             if reserve_value == "No":
                 update_query = "UPDATE books SET reservation = 'Yes' WHERE title = %s"
                 cursor.execute(update_query, (title,))
-                conn.commit()
+                self.connection.commit()
                 print("Reserved successfully\n")
             elif reserve_value == "Yes":
                 print("Book is already reserved\n")
@@ -54,13 +60,7 @@ class Home:
 
     
     def BookList(self):
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="yadhuafr141",
-            database="library"
-        )
-        cursor = conn.cursor()
+        cursor=self.connection.cursor()
         select_query = "SELECT * FROM books"
         cursor.execute(select_query)
         rows = cursor.fetchall()
@@ -68,7 +68,7 @@ class Home:
         print(tabulate(rows, headers=columns, tablefmt="psql"))
         print("\n")
         cursor.close()
-        conn.close()
+        self.connection.close()
         return
 
 
@@ -78,23 +78,23 @@ class Home:
         while True:
             print("1.Search\n2.Reserve\n3.Book list\n4.Log out\n")
             try:
-                ch=int(input("Enter choice:"))
+                choice=int(input("Enter choice:"))
             except Exception:
                 print("Invalid choice try again")
                 continue
-            if ch==1:
+            if choice==1:
                 title=input("Enter title: ")
                 self.Search(title) 
-            elif ch==2:
+            elif choice==2:
                 count+=1
                 if count<=2:
                     self.Reserve()
                 else:
                     print("You can only reserve two books!!!")
-            elif ch==3:
+            elif choice==3:
                 self.BookList()
 
-            elif ch==4:
+            elif choice==4:
                 hd=input("Go for home delivery?(y/n): ")
                 if hd=='y':
                     HD.verify(username)                                       
@@ -103,4 +103,4 @@ class Home:
                 return
             else:
                 print("\nInvalid choice try again\n")
-h=Home()
+home=Home()

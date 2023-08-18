@@ -2,23 +2,26 @@ import csv
 import mysql.connector
 from tabulate import tabulate
 class Admin_menu:    
-    def __init__(self) -> None:
+    def __init__(self):
+        db_config  = {}
+        with open("C:/Users/user/OneDrive/Desktop/LMS/Database_connection.txt", 'r') as file:
+            lines = file.readlines()
+            db_config['Host'] = lines[0].strip()
+            db_config['User'] = lines[1].strip()
+            db_config['Password'] = lines[2].strip()
+            db_config['Database'] = lines[3].strip()
         try:
-            self.conn = mysql.connector.connect(
-                host="127.0.0.1",
-                user="root",
-                password="yadhuafr141",
-                database="library"
+            self.connection = mysql.connector.connect(
+                host=db_config['Host'],
+                user=db_config['User'],
+                password=db_config['Password'],
+                database=db_config['Database']
             )
         except Exception:
             print("Error with database connection")
             return
         else:
-            self.cursor = self.conn.cursor() 
-
-    def __del__(self):
-        self.cursor.close()
-        self.conn.close()
+            self.cursor = self.connection.cursor() 
 
     def Search(self,title):
         select_query = "SELECT * FROM books WHERE title = %s"
@@ -34,7 +37,7 @@ class Admin_menu:
         if row is not None:
             delete_query = "DELETE FROM users WHERE name = %s"
             self.cursor.execute(delete_query, (username,))
-            self.conn.commit()
+            self.connection.commit()
             print("User deleted successfully!")
         else:
             print("User not found.")
@@ -47,7 +50,7 @@ class Admin_menu:
         insert_query = "INSERT INTO books (title, author, reservation) VALUES (%s, %s, %s)"
         values = (title, author, reservation)
         self.cursor.execute(insert_query, values)
-        self.conn.commit()
+        self.connection.commit()
         print("Book added successfully!\n")
         return
 
@@ -55,7 +58,7 @@ class Admin_menu:
         title=input("Enter book title to be removed:")    
         delete_query = "DELETE FROM books WHERE title = %s"
         self.cursor.execute(delete_query, (title,))
-        self.conn.commit()
+        self.connection.commit()
         print("Book deleted successfully!\n")
         return
 
@@ -69,7 +72,7 @@ class Admin_menu:
             if current_reservation == "Yes":
                 update_query = "UPDATE books SET reservation = 'No' WHERE title = %s"
                 self.cursor.execute(update_query, (title,))
-                self.conn.commit()
+                self.connection.commit()
                 print("Reservation status updated: Book is now unreserved.")
             else:
                 print("This book is already unreserved.")
@@ -131,17 +134,17 @@ class Admin_menu:
         while True:
             print("1.Books management\n2.Users management\n3.View Users\n4.Go back")
             try:
-                ch=int(input("Enter choice:"))
+                choice=int(input("Enter choice:"))
             except Exception:
                 print("Invalid choice try again")
                 continue
-            if ch==1:
+            if choice==1:
                 self.Book_manage()
-            elif ch==2:
+            elif choice==2:
                 self.User_manage()
-            elif ch==3:
+            elif choice==3:
                 self.view_users()
-            elif ch==4:
+            elif choice==4:
                 return
             else:
                 print("\nInvalid choice try again\n")
