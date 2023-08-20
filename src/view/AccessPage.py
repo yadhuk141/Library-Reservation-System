@@ -1,5 +1,5 @@
 '''
-Title: Online library reservation system  
+Title: Library reservation system  
 Author: Yadhu krishnan S 
 Created on: 02/02/2023 
 Last Modified Date: 25/07/2023 

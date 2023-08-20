@@ -3,19 +3,19 @@ import mysql.connector
 from tabulate import tabulate
 class Admin_menu:    
     def __init__(self):
-        db_config  = {}
+        database_config  = {}
         with open("C:/Users/user/OneDrive/Desktop/LMS/Database_connection.txt", 'r') as file:
             lines = file.readlines()
-            db_config['Host'] = lines[0].strip()
-            db_config['User'] = lines[1].strip()
-            db_config['Password'] = lines[2].strip()
-            db_config['Database'] = lines[3].strip()
+            database_config['Host'] = lines[0].strip()
+            database_config['User'] = lines[1].strip()
+            database_config['Password'] = lines[2].strip()
+            database_config['Database'] = lines[3].strip()
         try:
             self.connection = mysql.connector.connect(
-                host=db_config['Host'],
-                user=db_config['User'],
-                password=db_config['Password'],
-                database=db_config['Database']
+                host=database_config['Host'],
+                user=database_config['User'],
+                password=database_config['Password'],
+                database=database_config['Database']
             )
         except Exception:
             print("Error with database connection")
